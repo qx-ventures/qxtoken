@@ -3,13 +3,10 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
 
-import "../src/QToken.sol";
+import "../src/Qtoken.sol";
 import "./utils/Utilities.sol";
 
-contract QTokenTest is Test {
-    uint256 constant INITIAL_SUPPLY = 10 ** 6;
-    uint256 constant ROYALTY_FEE_PERCENTAGE = 10;
-
+contract QtokenTest is Test {
     Utilities internal utils;
 
     address[] internal users;
@@ -17,32 +14,106 @@ contract QTokenTest is Test {
     address payable internal bob;
     address payable internal alice;
 
-    QToken internal qtoken;
+    Qtoken internal qtoken;
 
     function setUp() public {
         utils = new Utilities();
+
         users = utils.createUsers(3);
         owner = payable(users[0]);
         bob = payable(users[1]);
         alice = payable(users[2]);
 
-        qtoken = new QToken(
-            "QToken",
-            "QTOK",
-            18,
-            INITIAL_SUPPLY,
-            owner,
-            ROYALTY_FEE_PERCENTAGE
-        );
+        vm.prank(owner);
+        qtoken = new Qtoken();
     }
 
-    function testTransfer() public {
-        console.log(qtoken.balanceOf(bob));
+    function test_owner_owns_qtoken() public {
+        vm.prank(owner);
+        assertEq(qtoken.owner(), owner);
+    }
 
-        vm.startPrank(owner);
+    function test_owner_can_pause() public {
+        vm.prank(owner);
+        qtoken.pause();
+
+        assertTrue(qtoken.paused());
+    }
+
+    function test_owner_can_unpause() public {
+        vm.prank(owner);
+        qtoken.pause();
+        assertTrue(qtoken.paused());
+
+        vm.prank(owner);
+        qtoken.unpause();
+        assertFalse(qtoken.paused());
+    }
+
+    function test_paused_cant_mint() public {
+        vm.prank(owner);
+        qtoken.pause();
+        assertTrue(qtoken.paused());
+
+        vm.prank(owner);
+        vm.expectRevert();
+        qtoken.mint(bob, 100);
+    }
+
+    function test_paused_cant_transfer() public {
+        vm.prank(owner);
+        qtoken.mint(owner, 100);
+        assertEq(qtoken.balanceOf(owner), 100);
+
+        vm.prank(owner);
+        qtoken.pause();
+        assertTrue(qtoken.paused());
+
+        vm.prank(owner);
+        vm.expectRevert();
         qtoken.transfer(bob, 100);
+    }
 
-        console.log(qtoken.balanceOf(bob));
-        assertEq(qtoken.balanceOf(bob), 100 - ROYALTY_FEE_PERCENTAGE);
+    function test_paused_cant_burn() public {
+        vm.prank(owner);
+        qtoken.mint(owner, 100);
+        assertEq(qtoken.balanceOf(owner), 100);
+
+        vm.prank(owner);
+        qtoken.pause();
+        assertTrue(qtoken.paused());
+
+        vm.prank(owner);
+        vm.expectRevert();
+        qtoken.burn(100);
+    }
+
+    function test_user_cant_mint() public {
+        vm.prank(bob);
+        vm.expectRevert();
+        qtoken.mint(bob, 100);
+    }
+
+    function test_mint_to_owner() public {
+        vm.prank(owner);
+        qtoken.mint(owner, 100);
+        assertEq(qtoken.balanceOf(owner), 100);
+    }
+
+    function test_mint_to_bob() public {
+        vm.prank(owner);
+        qtoken.mint(bob, 100);
+        assertEq(qtoken.balanceOf(bob), 100);
+    }
+
+    function test_user_can_transfer_to_user() public {
+        vm.prank(owner);
+        qtoken.mint(bob, 100);
+        assertEq(qtoken.balanceOf(bob), 100);
+
+        vm.prank(bob);
+        qtoken.transfer(alice, 100);
+        assertEq(qtoken.balanceOf(bob), 0);
+        assertEq(qtoken.balanceOf(alice), 100);
     }
 }

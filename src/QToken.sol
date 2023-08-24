@@ -1,53 +1,28 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.9;
 
-import { ERC20 } from "solmate/tokens/ERC20.sol";
+import "openzeppelin/token/ERC20/ERC20.sol";
+import "openzeppelin/token/ERC20/extensions/ERC20Burnable.sol";
+import "openzeppelin/security/Pausable.sol";
+import "openzeppelin/access/Ownable.sol";
+import "openzeppelin/token/ERC20/extensions/ERC20Permit.sol";
 
-contract QToken is ERC20 {
-    address public royaltyAddress;
-    uint256 public royaltyFeePercentage;
-    
-    constructor(
-        string memory _name, 
-        string memory _symbol, 
-        uint8 _decimals,
-        uint256 _initialSupply,
-        address _royaltyAddress,
-        uint256 _royaltyFeePercentage
-    ) ERC20(_name, _symbol, _decimals) {
-        royaltyAddress = _royaltyAddress;
-        royaltyFeePercentage = _royaltyFeePercentage;
-        _mint(_royaltyAddress, _initialSupply);
+contract Qtoken is ERC20, ERC20Burnable, Pausable, Ownable, ERC20Permit {
+    constructor() ERC20("Qtoken", "QTOK") ERC20Permit("Qtoken") {}
+
+    function pause() public onlyOwner {
+        _pause();
     }
 
-    function transferWithRoyalty(address to, uint256 amount) public returns (bool) {
-        uint256 royaltyAmount = amount * royaltyFeePercentage / 100;
-
-        transfer(royaltyAddress, royaltyAmount);
-        transfer(to, amount - royaltyAmount);
-
-        return true;
+    function unpause() public onlyOwner {
+        _unpause();
     }
 
-    function transfer(address to, uint256 amount) public virtual override returns (bool) {
-        uint256 royaltyAmount = amount * royaltyFeePercentage / 100;
-        
-        balanceOf[msg.sender] -= amount;
+    function mint(address to, uint256 amount) public onlyOwner {
+        _mint(to, amount);
+    }
 
-        // can't overflow because the sum of all user
-        // balances can't exceed the max uint256 value.
-        unchecked {
-            // transfer to destination the subtracted amount
-            balanceOf[to] += amount - royaltyAmount;
-            // add to our royaltyAddress wallet the royaltyAmount
-            balanceOf[royaltyAddress] += royaltyAmount;
-        }
-
-        // transfer to the destination address
-        emit Transfer(msg.sender, to, amount - royaltyAmount);
-        // transfer to our royalty address
-        emit Transfer(msg.sender, royaltyAddress, royaltyAmount);
-
-        return true;
+    function _beforeTokenTransfer(address from, address to, uint256 amount) internal override whenNotPaused {
+        super._beforeTokenTransfer(from, to, amount);
     }
 }
