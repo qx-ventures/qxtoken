@@ -3,10 +3,10 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
 
-import "../src/Qtoken.sol";
+import "../src/QXToken.sol";
 import "./utils/Utilities.sol";
 
-contract QtokenTest is Test {
+contract QXTokenTest is Test {
     Utilities internal utils;
 
     address[] internal users;
@@ -14,7 +14,7 @@ contract QtokenTest is Test {
     address payable internal bob;
     address payable internal alice;
 
-    Qtoken internal qtoken;
+    QXToken internal qxtoken;
 
     function setUp() public {
         utils = new Utilities();
@@ -25,95 +25,95 @@ contract QtokenTest is Test {
         alice = payable(users[2]);
 
         vm.prank(owner);
-        qtoken = new Qtoken();
+        qxtoken = new QXToken();
     }
 
-    function test_owner_owns_qtoken() public {
+    function test_owner_owns_qxtoken() public {
         vm.prank(owner);
-        assertEq(qtoken.owner(), owner);
+        assertEq(qxtoken.owner(), owner);
     }
 
     function test_owner_can_pause() public {
         vm.prank(owner);
-        qtoken.pause();
+        qxtoken.pause();
 
-        assertTrue(qtoken.paused());
+        assertTrue(qxtoken.paused());
     }
 
     function test_owner_can_unpause() public {
         vm.prank(owner);
-        qtoken.pause();
-        assertTrue(qtoken.paused());
+        qxtoken.pause();
+        assertTrue(qxtoken.paused());
 
         vm.prank(owner);
-        qtoken.unpause();
-        assertFalse(qtoken.paused());
+        qxtoken.unpause();
+        assertFalse(qxtoken.paused());
     }
 
     function test_paused_cant_mint() public {
         vm.prank(owner);
-        qtoken.pause();
-        assertTrue(qtoken.paused());
+        qxtoken.pause();
+        assertTrue(qxtoken.paused());
 
         vm.prank(owner);
         vm.expectRevert();
-        qtoken.mint(bob, 100);
+        qxtoken.mint(bob, 100);
     }
 
     function test_paused_cant_transfer() public {
         vm.prank(owner);
-        qtoken.mint(owner, 100);
-        assertEq(qtoken.balanceOf(owner), 100);
+        qxtoken.mint(owner, 100);
+        assertEq(qxtoken.balanceOf(owner), 100);
 
         vm.prank(owner);
-        qtoken.pause();
-        assertTrue(qtoken.paused());
+        qxtoken.pause();
+        assertTrue(qxtoken.paused());
 
         vm.prank(owner);
         vm.expectRevert();
-        qtoken.transfer(bob, 100);
+        qxtoken.transfer(bob, 100);
     }
 
     function test_paused_cant_burn() public {
         vm.prank(owner);
-        qtoken.mint(owner, 100);
-        assertEq(qtoken.balanceOf(owner), 100);
+        qxtoken.mint(owner, 100);
+        assertEq(qxtoken.balanceOf(owner), 100);
 
         vm.prank(owner);
-        qtoken.pause();
-        assertTrue(qtoken.paused());
+        qxtoken.pause();
+        assertTrue(qxtoken.paused());
 
         vm.prank(owner);
         vm.expectRevert();
-        qtoken.burn(100);
+        qxtoken.burn(100);
     }
 
     function test_user_cant_mint() public {
         vm.prank(bob);
         vm.expectRevert();
-        qtoken.mint(bob, 100);
+        qxtoken.mint(bob, 100);
     }
 
     function test_mint_to_owner() public {
         vm.prank(owner);
-        qtoken.mint(owner, 100);
-        assertEq(qtoken.balanceOf(owner), 100);
+        qxtoken.mint(owner, 100);
+        assertEq(qxtoken.balanceOf(owner), 100);
     }
 
     function test_mint_to_bob() public {
         vm.prank(owner);
-        qtoken.mint(bob, 100);
-        assertEq(qtoken.balanceOf(bob), 100);
+        qxtoken.mint(bob, 100);
+        assertEq(qxtoken.balanceOf(bob), 100);
     }
 
     function test_user_can_transfer_to_user() public {
         vm.prank(owner);
-        qtoken.mint(bob, 100);
-        assertEq(qtoken.balanceOf(bob), 100);
+        qxtoken.mint(bob, 100);
+        assertEq(qxtoken.balanceOf(bob), 100);
 
         vm.prank(bob);
-        qtoken.transfer(alice, 100);
-        assertEq(qtoken.balanceOf(bob), 0);
-        assertEq(qtoken.balanceOf(alice), 100);
+        qxtoken.transfer(alice, 100);
+        assertEq(qxtoken.balanceOf(bob), 0);
+        assertEq(qxtoken.balanceOf(alice), 100);
     }
 }

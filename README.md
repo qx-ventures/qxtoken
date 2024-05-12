@@ -1,6 +1,6 @@
-# Qtoken
+# QXToken
 
-Qtoken ERC20 contract, tests and deployment scripts, all written in Solidity.
+QXToken ERC20 contract, tests and deployment scripts, all written in Solidity.
 
 ## Getting Started
 
@@ -12,7 +12,7 @@ Qtoken ERC20 contract, tests and deployment scripts, all written in Solidity.
 
 - Clone the repository
 ```bash
-git clone https://bitbucket.org/qxv/qtoken/src/master/ && cd qtoken
+git clone https://github.com/qx-ventures/qxtoken.git && cd qxtoken
 ```
 - Install the libraries
 ```bash
@@ -51,6 +51,10 @@ make test
 ```bash
 make deploy
 ```
+- Verify the contract
+```bash
+make verify
+```
 - Call the deployed contract to check user balance
 ```bash
 cast call <DEPLOYED_ADDRESS> \
@@ -73,4 +77,7 @@ make deploy ARGS="--network <NETWORK>"
 ## Current deployed contracts
 
 - Polygon Mumbai Testnet:
-  - Qtoken:  https://mumbai.polygonscan.com/address/0x98210494dd6c0e8b487888b1c7c29d613bf53bb6
+  - Qtoken: https://mumbai.polygonscan.com/address/0x98210494dd6c0e8b487888b1c7c29d613bf53bb6
+
+- Polygon Amoy Testnet:
+  - QXToken: https://amoy.polygonscan.com/token/0x98210494dd6c0e8b487888b1c7c29d613bf53bb6

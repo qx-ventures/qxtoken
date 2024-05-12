@@ -7,8 +7,8 @@ import "openzeppelin/security/Pausable.sol";
 import "openzeppelin/access/Ownable.sol";
 import "openzeppelin/token/ERC20/extensions/ERC20Permit.sol";
 
-contract Qtoken is ERC20, ERC20Burnable, Pausable, Ownable, ERC20Permit {
-    constructor() ERC20("Qtoken", "QTOK") ERC20Permit("Qtoken") {}
+contract QXToken is ERC20, ERC20Burnable, Pausable, Ownable, ERC20Permit {
+    constructor() ERC20("QXToken", "QXT") ERC20Permit("QXToken") {}
 
     function pause() public onlyOwner {
         _pause();
